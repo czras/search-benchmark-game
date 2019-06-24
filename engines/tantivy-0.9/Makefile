@@ -1,5 +1,3 @@
-CORPUS = /home/paul/git/search-index-benchmark-game/corpus.json
-
 clean:
 	rm -fr idx
 	rm -fr target

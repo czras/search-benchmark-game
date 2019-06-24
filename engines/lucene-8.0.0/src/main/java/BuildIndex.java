@@ -36,8 +36,8 @@ public class BuildIndex {
                         continue;
                     }
                     final JsonObject parsed_doc = Json.parse(line).asObject();
-                    final String id = parsed_doc.get("id").asString();
-                    final String text = parsed_doc.get("text").asString();
+                    final String id = parsed_doc.get("url").asString();
+                    final String text = parsed_doc.get("body").asString();
                     idField.setStringValue(id);
                     textField.setStringValue(text);
                     writer.addDocument(document);

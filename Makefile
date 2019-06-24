@@ -1,38 +1,37 @@
-#CORPUS = `pwd`/wiki-articles.json
-CORPUS = /home/paul/git/search-index-benchmark-game/corpus.json
+CORPUS = $(PWD)/corpus.json
 export
 
-COMMANDS = COUNT NO_SCORE TOP_10
-# ENGINES = `ls engines`
-ENGINES=lucene-7.2.1 lucene-8.0.0 tantivy-0.6 tantivy-0.7 tantivy-0.8 tantivy-0.9
-#ENGINES=tantivy-0.8 tantivy-0.7
-#ENGINES=tantivy-0.7 tantivy-0.8
-# ENGINES = lucene-8.0.0 tantivy-0.8
+CORPUS_URL = https://www.dropbox.com/s/wwnfnu441w1ec9p/wiki-articles.json.bz2?dl=0
+COMMANDS = COUNT NO_SCORE TOP_10 # not used anymore in client.py
+ENGINES = `ls engines`
 
 all: index
 
-corpus.json:
-	echo "Download corpus.json from https://www.dropbox.com/s/wwnfnu441w1ec9p/wiki-articles.json.bz2?dl=0"
+corpus.json.bz2:
+	wget $(CORPUS_URL) -O corpus.json.bz2
+
+corpus.json: corpus.json.bz2
+	bunzip2 $(CORPUS).bz2
+
+corpus: corpus.json
 
 clean:
-	rm -fr results
-	for engine in $(ENGINES); do cd ${shell pwd}/engines/$$engine && make clean ; done
+	rm -f results.json
+	for engine in $(ENGINES); do cd $(PWD)/engines/$$engine && make clean ; done
 
 # Target to build the indexes of
 # all of the search engine
 index: $(INDEX_DIRECTORIES)
-	for engine in $(ENGINES); do cd ${shell pwd}/engines/$$engine && make index ; done
+	for engine in $(ENGINES); do cd $(PWD)/engines/$$engine && make index ; done
+
+compile:
+	for engine in $(ENGINES); do cd $(PWD)/engines/$$engine && make compile ; done
 
 # Target to run the query benchmark for
 # all of the search engines
 bench: #index compile
-	@rm -fr results
-	@mkdir results
+	@rm -f results.json
 	python3 src/client.py queries.txt $(ENGINES)
 
-compile:
-	for engine in $(ENGINES); do cd ${shell pwd}/engines/$$engine && make compile ; done
-
 serve:
-	# cp results.json web/output/results.json 
 	cd web/output && python -m SimpleHTTPServer 8000
